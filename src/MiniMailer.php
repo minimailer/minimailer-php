@@ -16,7 +16,6 @@ use MiniMailer\Resources\Inboxes;
 use MiniMailer\Resources\Suppressions;
 use MiniMailer\Resources\Tokens;
 use MiniMailer\Resources\Webhooks;
-use Override;
 
 /**
  * Entry point to the MiniMailer API. Wire it with an API key via {@see make()},
@@ -33,61 +32,51 @@ final readonly class MiniMailer implements MiniMailerContract
         return new self(new Client($apiKey, $baseUrl));
     }
 
-    #[Override]
     public function emails(): Emails
     {
         return new Emails($this->client);
     }
 
-    #[Override]
     public function domains(): Domains
     {
         return new Domains($this->client);
     }
 
-    #[Override]
     public function webhooks(): Webhooks
     {
         return new Webhooks($this->client);
     }
 
-    #[Override]
     public function inbound(): Inbound
     {
         return new Inbound($this->client);
     }
 
-    #[Override]
     public function inboxes(): Inboxes
     {
         return new Inboxes($this->client);
     }
 
-    #[Override]
     public function audiences(): Audiences
     {
         return new Audiences($this->client);
     }
 
-    #[Override]
     public function contacts(): Contacts
     {
         return new Contacts($this->client);
     }
 
-    #[Override]
     public function campaigns(): Campaigns
     {
         return new Campaigns($this->client);
     }
 
-    #[Override]
     public function suppressions(): Suppressions
     {
         return new Suppressions($this->client);
     }
 
-    #[Override]
     public function tokens(): Tokens
     {
         return new Tokens($this->client);

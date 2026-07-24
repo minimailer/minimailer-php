@@ -15,7 +15,6 @@ use MiniMailer\Exceptions\ConflictException;
 use MiniMailer\Exceptions\RateLimitException;
 use MiniMailer\Exceptions\UnsupportedMediaTypeException;
 use MiniMailer\Exceptions\ValidationException;
-use Override;
 use Psr\Http\Client\ClientExceptionInterface;
 use Psr\Http\Client\ClientInterface;
 
@@ -23,16 +22,16 @@ use Psr\Http\Client\ClientInterface;
  * Framework-agnostic HTTP layer for the MiniMailer JSON:API. Talks to any
  * PSR-18 client (Guzzle by default) and returns the SDK's own {@see Response}.
  */
-final class Client implements ClientContract
+final readonly class Client implements ClientContract
 {
     private const CONTENT_TYPE = 'application/vnd.api+json';
 
-    private readonly ClientInterface $httpClient;
+    private ClientInterface $httpClient;
 
-    private readonly string $baseUrl;
+    private string $baseUrl;
 
     public function __construct(
-        private readonly string $apiKey,
+        private string $apiKey,
         string $baseUrl = 'https://api.minimailer.app/',
         ?ClientInterface $httpClient = null,
     ) {
@@ -40,7 +39,6 @@ final class Client implements ClientContract
         $this->httpClient = $httpClient ?? new GuzzleClient;
     }
 
-    #[Override]
     public function list(string $resource, array $query = []): Response
     {
         $path = $query === [] ? $resource : $resource.'?'.http_build_query($query);
@@ -48,25 +46,21 @@ final class Client implements ClientContract
         return $this->send('GET', $path);
     }
 
-    #[Override]
     public function get(string $resource, string $id): Response
     {
         return $this->send('GET', $resource.'/'.$id);
     }
 
-    #[Override]
     public function create(string $resource, array $data = [], array $headers = []): Response
     {
         return $this->send('POST', $resource, $data, $headers);
     }
 
-    #[Override]
     public function update(string $resource, string $id, array $data = [], array $headers = []): Response
     {
         return $this->send('PATCH', $resource.'/'.$id, $data, $headers);
     }
 
-    #[Override]
     public function delete(string $resource, string $id): Response
     {
         return $this->send('DELETE', $resource.'/'.$id);
