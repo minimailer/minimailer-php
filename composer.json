@@ -1,7 +1,14 @@
 {
     "name": "minimailer/minimailer-php",
     "description": "PHP SDK for the MiniMailer API — EU-resident, GDPR-first email infrastructure.",
-    "keywords": ["minimailer", "email", "sdk", "api", "transactional", "mailer"],
+    "keywords": [
+        "minimailer",
+        "email",
+        "sdk",
+        "api",
+        "transactional",
+        "mailer"
+    ],
     "license": "MIT",
     "type": "library",
     "authors": [
@@ -35,7 +42,19 @@
         "allow-plugins": {
             "pestphp/pest-plugin": true
         },
-        "sort-packages": true
+        "sort-packages": true,
+        "policy": {
+            "malware": {
+                "block": true,
+                "block-scope": "all"
+            },
+            "advisories": {
+                "block": true
+            },
+            "abandoned": {
+                "audit": "report"
+            }
+        }
     },
     "scripts": {
         "lint": "pint --test",
