@@ -1,0 +1,20 @@
+# https://docs.github.com/github/administering-a-repository/configuration-options-for-dependency-updates
+
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "dependencies"
+
+  # This package ships no committed lockfile, so updates land as widened
+  # constraints in composer.json — the range consumers resolve against.
+  - package-ecosystem: "composer"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    versioning-strategy: "widen"
+    labels:
+      - "dependencies"
