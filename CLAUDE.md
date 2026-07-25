@@ -12,12 +12,23 @@ vendor/bin/pest tests/Unit/EmailsTest.php          # single file
 vendor/bin/pest --filter="typed exceptions"        # single test by name
 ```
 
-Two workflows, both installing with `composer update` rather than `install` — `composer.lock` is gitignored (library convention):
+Three workflows, all installing with `composer update` rather than `install` — `composer.lock` is gitignored (library convention):
 
 - **`tests.yml`** — `pest` across a 24-cell matrix: PHP 8.2–8.5 × ubuntu/windows/macos × `prefer-lowest`/`prefer-stable`. Run `composer update --prefer-lowest` locally before pushing a dependency change; the lowest-bound cell is what catches widened constraints.
 - **`quality.yml`** — `composer lint` (Pint) on a single cell, PHP 8.4 / ubuntu.
+- **`composer-security.yml`** — `composer audit` on a pinned `composer:2.10`, which fails on malware and advisories. Triggers on `composer.json` changes, PRs, and a weekly cron; the cron is the point, since a dependency can be flagged long after the constraint last changed. `managed-by: ComposerSecurityStamp` — regenerate it rather than hand-editing, but note the pins below were aligned by hand after stamping.
 
-CI **verifies, never mutates**: `composer lint` is `pint --test`, which fails the run on a style violation instead of fixing it and committing back. Both workflows hold a `contents: read` token. Fix style locally with `vendor/bin/pint` and push the fix — never convert these into auto-commit steps.
+CI **verifies, never mutates**: `composer lint` is `pint --test`, which fails the run on a style violation instead of fixing it and committing back. Every workflow holds a `contents: read` token and sets `persist-credentials: false` on checkout so the job never keeps a usable credential in `.git/config`. Fix style locally with `vendor/bin/pint` and push the fix — never convert these into auto-commit steps.
+
+Dependabot (`.github/dependabot.yml`) watches `github-actions` and `composer` weekly. Its job on the actions side is keeping the SHA pins from rotting — that is the intended way pins get bumped, so review those PRs rather than bumping by hand.
+
+### Packaging
+
+`.gitattributes` `export-ignore` decides what a consumer actually downloads: only `src/`, `README.md`, `LICENSE`, `composer.json` and `CHANGELOG.md` ship. Adding a new dev-only directory or config file means adding an `export-ignore` line for it. Verify with:
+
+```bash
+git archive --worktree-attributes --format=tar HEAD | tar -t
+```
 
 ### Workflow actions must be pinned to a full-length commit SHA
 
@@ -34,6 +45,8 @@ gh api repos/OWNER/REPO/git/ref/tags/TAG --jq '.object.sha,.object.type'
 ```
 
 Expect `type: commit`. If it returns `tag`, the ref is annotated — dereference it (`gh api repos/OWNER/REPO/git/tags/SHA --jq '.object.sha'`) and pin the commit it points at, not the tag object.
+
+Resolve against a **precise** release tag (`v7.0.1`), never a rolling major (`v6`, `v2`). A rolling tag moves, so a comment reading `# v6` silently becomes wrong about what is pinned — which is exactly what happened to the pin this repo inherited. All three workflows pin the same two actions at the same two SHAs; keep it that way so a bump is one decision, not three.
 
 ## Architecture
 
