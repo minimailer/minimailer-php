@@ -8,11 +8,14 @@ use MiniMailer\Contracts\ClientContract;
 use MiniMailer\Contracts\MiniMailerContract;
 use MiniMailer\Resources\Audiences;
 use MiniMailer\Resources\Campaigns;
+use MiniMailer\Resources\Compliance;
 use MiniMailer\Resources\Contacts;
+use MiniMailer\Resources\Deliveries;
 use MiniMailer\Resources\Domains;
 use MiniMailer\Resources\Emails;
 use MiniMailer\Resources\Inbound;
 use MiniMailer\Resources\Inboxes;
+use MiniMailer\Resources\Recipients;
 use MiniMailer\Resources\Suppressions;
 use MiniMailer\Resources\Tokens;
 use MiniMailer\Resources\Webhooks;
@@ -45,6 +48,11 @@ final readonly class MiniMailer implements MiniMailerContract
     public function webhooks(): Webhooks
     {
         return new Webhooks($this->client);
+    }
+
+    public function deliveries(): Deliveries
+    {
+        return new Deliveries($this->client);
     }
 
     public function inbound(): Inbound
@@ -80,5 +88,15 @@ final readonly class MiniMailer implements MiniMailerContract
     public function tokens(): Tokens
     {
         return new Tokens($this->client);
+    }
+
+    public function recipients(): Recipients
+    {
+        return new Recipients($this->client);
+    }
+
+    public function compliance(): Compliance
+    {
+        return new Compliance($this->client);
     }
 }
