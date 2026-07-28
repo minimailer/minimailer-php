@@ -63,7 +63,7 @@ Framework-agnostic SDK for the MiniMailer **v1 JSON:API**. Four layers, each wit
 - **Exception mapping lives in one `match`** (`Client::throwForStatus`). Every subclass of `ApiException` maps to exactly one status: 401/403/409/415/422/429; anything else ≥400 falls through to `ApiException`. Adding a status means adding a class *and* an arm. The message prefers `errors.0.detail` from the JSON:API body, falling back to the raw body.
 - **PHP 8.2 floor.** No `#[Override]`, no 8.3+ syntax — the matrix will catch it, but `readonly class` (8.2) is fine and used on `Client`/`MiniMailer`.
 - **Non-CRUD actions go on the resource, expressed via `ClientContract`**, not by reaching for HTTP directly: see `Emails::stats()` (`get(path, "$id/stats")`) and `Deliveries::replay()` (`create("path/$id/replay")` → bodyless POST, 202).
-- **Path parameters that are raw user data get `rawurlencode()`d in the resource method** — `Recipients::forget()`/`data()` encode the email address; `Client` concatenates without encoding by design.
+- **Every path parameter is `rawurlencode()`d at the resource layer** — the verb traits encode `$id`, action methods encode it before appending their suffix (`rawurlencode($id).'/stats'`), and `Recipients` encodes the email address. `Client` concatenates without encoding by design; never pass unencoded user input through it.
 
 ## Tests
 

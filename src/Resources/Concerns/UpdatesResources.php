@@ -17,6 +17,6 @@ trait UpdatesResources
      */
     public function update(string $id, array $data, array $headers = []): Response
     {
-        return $this->client->update($this->path(), $id, $data, $headers);
+        return $this->client->update($this->path(), rawurlencode($id), $data, $headers);
     }
 }

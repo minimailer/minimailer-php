@@ -25,3 +25,8 @@ surface is not yet covered by SemVer guarantees until `1.0.0` is tagged.
   `controllerAudit`).
 - Complete mocked test suite asserting the verb, URL, status and body shape of
   every v1 operation, plus a reflection-based surface-parity test.
+
+### Fixed
+
+- Every path parameter is now URL-encoded at the resource layer, and query
+  strings are built with an explicit `&` separator and RFC 3986 encoding.

@@ -13,6 +13,6 @@ trait RetrievesResources
 {
     public function get(string $id): Response
     {
-        return $this->client->get($this->path(), $id);
+        return $this->client->get($this->path(), rawurlencode($id));
     }
 }

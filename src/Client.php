@@ -41,7 +41,7 @@ final readonly class Client implements ClientContract
 
     public function list(string $resource, array $query = []): Response
     {
-        $path = $query === [] ? $resource : $resource.'?'.http_build_query($query);
+        $path = $query === [] ? $resource : $resource.'?'.http_build_query($query, '', '&', PHP_QUERY_RFC3986);
 
         return $this->send('GET', $path);
     }

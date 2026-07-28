@@ -34,7 +34,7 @@ final class Audiences extends Resource
      */
     public function contacts(string $id, array $query = []): Response
     {
-        return $this->client->list($this->path().'/'.$id.'/relationships/contacts', $query);
+        return $this->client->list($this->path().'/'.rawurlencode($id).'/relationships/contacts', $query);
     }
 
     /**
@@ -44,7 +44,7 @@ final class Audiences extends Resource
      */
     public function addContact(string $id, array $data): Response
     {
-        return $this->client->create($this->path().'/'.$id.'/relationships/contacts', $data);
+        return $this->client->create($this->path().'/'.rawurlencode($id).'/relationships/contacts', $data);
     }
 
     /**
@@ -54,6 +54,6 @@ final class Audiences extends Resource
      */
     public function importContacts(string $id, array $data): Response
     {
-        return $this->client->create($this->path().'/'.$id.'/relationships/contacts/import', $data);
+        return $this->client->create($this->path().'/'.rawurlencode($id).'/relationships/contacts/import', $data);
     }
 }

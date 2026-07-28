@@ -30,6 +30,6 @@ final class Campaigns extends Resource
 
     public function stats(string $id): Response
     {
-        return $this->client->get($this->path(), $id.'/stats');
+        return $this->client->get($this->path(), rawurlencode($id).'/stats');
     }
 }

@@ -35,6 +35,6 @@ final class Webhooks extends Resource
      */
     public function deliveries(string $id, array $query = []): Response
     {
-        return $this->client->list($this->path().'/'.$id.'/relationships/deliveries', $query);
+        return $this->client->list($this->path().'/'.rawurlencode($id).'/relationships/deliveries', $query);
     }
 }

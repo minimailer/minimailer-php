@@ -34,6 +34,6 @@ final class Inboxes extends Resource
      */
     public function inboundEmails(string $id, array $query = []): Response
     {
-        return $this->client->list($this->path().'/'.$id.'/relationships/inbound-emails', $query);
+        return $this->client->list($this->path().'/'.rawurlencode($id).'/relationships/inbound-emails', $query);
     }
 }

@@ -25,6 +25,6 @@ final class Deliveries extends Resource
      */
     public function replay(string $id): Response
     {
-        return $this->client->create($this->path().'/'.$id.'/replay');
+        return $this->client->create($this->path().'/'.rawurlencode($id).'/replay');
     }
 }

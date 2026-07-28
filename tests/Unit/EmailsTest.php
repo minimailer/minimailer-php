@@ -93,6 +93,22 @@ it('deletes a stored outbound email record', function (): void {
         ->and($response->status())->toBe(204);
 });
 
+it('URL-encodes the resource id in the path', function (): void {
+    $history = [];
+    $mm = fakeMiniMailerWithHistory([
+        new GuzzleResponse(200, [], '{}'),
+        new GuzzleResponse(200, [], '{}'),
+    ], $history);
+
+    $mm->emails()->get('email/../escape');
+    $mm->emails()->stats('email/../escape');
+
+    expect((string) $history[0]['request']->getUri())
+        ->toBe('https://api.minimailer.app/outbound-emails/email%2F..%2Fescape')
+        ->and((string) $history[1]['request']->getUri())
+        ->toBe('https://api.minimailer.app/outbound-emails/email%2F..%2Fescape/stats');
+});
+
 it('fetches per-send stats from the stats sub-resource', function (): void {
     $history = [];
     $mm = fakeMiniMailerWithHistory([

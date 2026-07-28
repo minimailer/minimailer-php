@@ -13,6 +13,6 @@ trait DeletesResources
 {
     public function delete(string $id): Response
     {
-        return $this->client->delete($this->path(), $id);
+        return $this->client->delete($this->path(), rawurlencode($id));
     }
 }
