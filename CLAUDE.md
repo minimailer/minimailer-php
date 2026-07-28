@@ -54,7 +54,7 @@ Framework-agnostic SDK for the MiniMailer **v1 JSON:API**. Four layers, each wit
 
 1. **`MiniMailer`** (`src/MiniMailer.php`) — entry point. `MiniMailer::make($apiKey)` wires a default `Client`; the constructor takes a `ClientContract` so a framework container (e.g. `minimailer/laravel-minimailer`) can inject its own. Every accessor (`emails()`, `domains()`, …) returns a fresh resource bound to the same client.
 2. **`Client`** (`src/Client.php`) — the only place HTTP happens. Builds a PSR-7 `Request`, sends via any PSR-18 `ClientInterface` (Guzzle by default), stamps `Authorization: Bearer`, `Accept`/`Content-Type: application/vnd.api+json` on every call, and maps status → typed exception in `throwForStatus()`.
-3. **`Resources\Resource`** (`src/Resources/`) — abstract base giving `list/get/create/update/delete`. Subclasses declare only `path()` (the v1 collection name) plus resource-specific actions. Note the path names differ from the accessors: `emails()` → `outbound-emails`, `inbound()` → `inbound-emails`.
+3. **`Resources\Resource`** (`src/Resources/`) — abstract base holding only the client and `path()` (the v1 collection name). CRUD verbs live in one-method traits under `Resources/Concerns/` (`ListsResources`, `RetrievesResources`, `CreatesResources`, `UpdatesResources`, `DeletesResources`); each resource composes **exactly** the verbs its v1 collection supports, so an unsupported verb is a type error, not a runtime 404. `SurfaceParityTest` pins the composition — changing a resource's surface means updating the spec mapping there too. Note the path names differ from the accessors: `emails()` → `outbound-emails`, `inbound()` → `inbound-emails`.
 4. **`Response`** (`src/Response.php`) — wraps the PSR-7 response so no concrete HTTP client type leaks across the public surface. `json('data.id')` supports dot-notation (including numeric segments, e.g. `errors.0.detail`); body is read once and memoised, rewinding a seekable stream first.
 
 ### Invariants worth preserving
@@ -62,11 +62,12 @@ Framework-agnostic SDK for the MiniMailer **v1 JSON:API**. Four layers, each wit
 - **No concrete HTTP type in the public API.** Resources and exceptions expose `MiniMailer\Response`, never a Guzzle/PSR-7 response. `Response::toPsr()` is the deliberate escape hatch.
 - **Exception mapping lives in one `match`** (`Client::throwForStatus`). Every subclass of `ApiException` maps to exactly one status: 401/403/409/415/422/429; anything else ≥400 falls through to `ApiException`. Adding a status means adding a class *and* an arm. The message prefers `errors.0.detail` from the JSON:API body, falling back to the raw body.
 - **PHP 8.2 floor.** No `#[Override]`, no 8.3+ syntax — the matrix will catch it, but `readonly class` (8.2) is fine and used on `Client`/`MiniMailer`.
-- **Non-CRUD actions go on the resource, expressed via `ClientContract`**, not by reaching for HTTP directly: see `Emails::stats()` (`get(path, "$id/stats")`) and `Domains::verify()` (`create("path/$id/verify")` → bodyless POST).
+- **Non-CRUD actions go on the resource, expressed via `ClientContract`**, not by reaching for HTTP directly: see `Emails::stats()` (`get(path, "$id/stats")`) and `Deliveries::replay()` (`create("path/$id/replay")` → bodyless POST, 202).
+- **Path parameters that are raw user data get `rawurlencode()`d in the resource method** — `Recipients::forget()`/`data()` encode the email address; `Client` concatenates without encoding by design.
 
 ## Tests
 
-Pest, unit-only, no network. `fakeMiniMailer([$responses])` in `tests/Pest.php` builds a client backed by Guzzle's `MockHandler`. When an assertion needs the *outgoing* request (path, headers, encoded body), build the stack inline with `Middleware::history($history)` instead — `EmailsTest` is the pattern to copy. `phpunit.xml` sets `failOnWarning` and `failOnRisky`.
+Pest, unit-only, **never any network** — every client is backed by Guzzle's `MockHandler`, and `NoNetworkTest` fails the suite if any test constructs an unmocked Guzzle client. Two helpers in `tests/Pest.php`: `fakeMiniMailer([$responses])` for response-side assertions, and `fakeMiniMailerWithHistory([$responses], $history)` when the assertion needs the *outgoing* request (method, URL, headers, encoded body) — `EmailsTest` is the pattern to copy. One contract-test file per resource asserts the exact verb/URL/status of every v1 operation. `phpunit.xml` sets `failOnWarning` and `failOnRisky`.
 
 ## Context
 

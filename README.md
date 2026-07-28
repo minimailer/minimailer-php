@@ -42,7 +42,23 @@ $id = $response->json('data.id'); // email_01JZX...
 
 ### Available resources
 
-`emails`, `domains`, `webhooks`, `inbound`, `inboxes`, `audiences`, `contacts`, `campaigns`, `suppressions`, `tokens` — each exposing `list()`, `get()`, `create()`, `update()`, `delete()` where the API supports them.
+Each resource exposes **exactly** the operations the v1 API supports — a verb the API does not offer does not exist on the SDK:
+
+| Accessor | Operations |
+| --- | --- |
+| `emails()` | `list`, `get`, `create`, `delete`, `stats($id)` |
+| `domains()` | `list`, `get`, `create`, `update`, `delete`, `records($id)` (DNS records to publish; verification is automatic) |
+| `webhooks()` | `list`, `get`, `create`, `update`, `delete`, `deliveries($id)` |
+| `deliveries()` | `get`, `replay($id)` (bodyless POST, 202) |
+| `inbound()` | `list`, `get` (read-only) |
+| `inboxes()` | `list`, `get`, `create`, `update`, `delete`, `inboundEmails($id)` |
+| `audiences()` | `list`, `get`, `create`, `update`, `delete`, `contacts($id)`, `addContact($id, $data)`, `importContacts($id, $data)` |
+| `contacts()` | `get`, `update`, `delete` (created through an audience) |
+| `campaigns()` | `list`, `get`, `create`, `update`, `delete`, `stats($id)` |
+| `suppressions()` | `list`, `delete` (permanent entries return 422) |
+| `tokens()` | `create`, `delete` (plaintext token returned once on create) |
+| `recipients()` | `forget($email)`, `data($email)` (GDPR erasure / subject access, async 202) |
+| `compliance()` | `createConsent($data)`, `controllerAudit()` |
 
 ### Error handling
 
