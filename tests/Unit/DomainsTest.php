@@ -122,7 +122,7 @@ it('fetches the DNS records for a sending domain', function (): void {
     $response = $mm->domains()->records('dom_1');
 
     expect($history[0]['request']->getMethod())->toBe('GET')
-        ->and((string) $history[0]['request']->getUri())->toBe('https://api.minimailer.app/domains/dom_1/relationships/records')
+        ->and((string) $history[0]['request']->getUri())->toBe('https://api.minimailer.app/domains/dom_1/records')
         ->and($response->status())->toBe(200)
         ->and($response->json('data.0.id'))->toBe('rec_1');
 });

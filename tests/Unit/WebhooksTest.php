@@ -115,7 +115,7 @@ it('lists delivery attempts for a webhook', function (): void {
     $response = $mm->webhooks()->deliveries('wh_1');
 
     expect($history[0]['request']->getMethod())->toBe('GET')
-        ->and((string) $history[0]['request']->getUri())->toBe('https://api.minimailer.app/webhooks/wh_1/relationships/deliveries')
+        ->and((string) $history[0]['request']->getUri())->toBe('https://api.minimailer.app/webhooks/wh_1/deliveries')
         ->and($response->status())->toBe(200)
         ->and($response->json('data.0.id'))->toBe('del_1');
 });
@@ -130,7 +130,7 @@ it('sorts delivery attempts for a webhook', function (): void {
 
     expect($history[0]['request']->getMethod())->toBe('GET')
         ->and((string) $history[0]['request']->getUri())
-        ->toBe('https://api.minimailer.app/webhooks/wh_1/relationships/deliveries?'.http_build_query([
+        ->toBe('https://api.minimailer.app/webhooks/wh_1/deliveries?'.http_build_query([
             'sort' => '-created_at',
         ]))
         ->and($response->status())->toBe(200)

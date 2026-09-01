@@ -110,7 +110,7 @@ it('lists contacts in an audience', function (): void {
     $response = $mm->audiences()->contacts('aud_1');
 
     expect($history[0]['request']->getMethod())->toBe('GET')
-        ->and((string) $history[0]['request']->getUri())->toBe('https://api.minimailer.app/audiences/aud_1/relationships/contacts')
+        ->and((string) $history[0]['request']->getUri())->toBe('https://api.minimailer.app/audiences/aud_1/contacts')
         ->and($response->status())->toBe(200)
         ->and($response->json('data.0.id'))->toBe('con_1');
 });
@@ -135,7 +135,7 @@ it('adds a contact to an audience', function (): void {
     $sent = json_decode((string) $request->getBody(), true);
 
     expect($request->getMethod())->toBe('POST')
-        ->and((string) $request->getUri())->toBe('https://api.minimailer.app/audiences/aud_1/relationships/contacts')
+        ->and((string) $request->getUri())->toBe('https://api.minimailer.app/audiences/aud_1/contacts')
         ->and($sent['data']['type'])->toBe('contacts')
         ->and($sent['data']['attributes']['email'])->toBe('a@example.com');
 });
@@ -167,7 +167,7 @@ it('imports contacts and returns created and skipped counts', function (): void 
     $sent = json_decode((string) $request->getBody(), true);
 
     expect($request->getMethod())->toBe('POST')
-        ->and((string) $request->getUri())->toBe('https://api.minimailer.app/audiences/aud_1/relationships/contacts/import')
+        ->and((string) $request->getUri())->toBe('https://api.minimailer.app/audiences/aud_1/contacts/import')
         ->and($sent['data']['type'])->toBe('contacts')
         ->and($sent['data']['attributes']['contacts'][0]['email'])->toBe('a@example.com')
         ->and($sent['data']['attributes']['contacts'][1]['email'])->toBe('b@example.com');

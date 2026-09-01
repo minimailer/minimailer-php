@@ -34,6 +34,6 @@ final class Domains extends Resource
      */
     public function records(string $id): Response
     {
-        return $this->client->get($this->path(), rawurlencode($id).'/relationships/records');
+        return $this->client->get($this->path(), rawurlencode($id).'/records');
     }
 }

@@ -107,7 +107,7 @@ it('lists inbound emails received by a mailbox', function (): void {
     $response = $mm->inboxes()->inboundEmails('inbox_1');
 
     expect($history[0]['request']->getMethod())->toBe('GET')
-        ->and((string) $history[0]['request']->getUri())->toBe('https://api.minimailer.app/inboxes/inbox_1/relationships/inbound-emails')
+        ->and((string) $history[0]['request']->getUri())->toBe('https://api.minimailer.app/inboxes/inbox_1/inbound-emails')
         ->and($response->status())->toBe(200)
         ->and($response->json('data.0.id'))->toBe('in_1');
 });
