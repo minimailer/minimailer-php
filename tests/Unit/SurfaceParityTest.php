@@ -46,5 +46,5 @@ it('exposes exactly the spec operations', function (string $class, array $expect
     'suppressions' => [Suppressions::class, ['list', 'delete']],
     'tokens' => [Tokens::class, ['create', 'delete']],
     'recipients' => [Recipients::class, ['forget', 'data']],
-    'compliance' => [Compliance::class, ['createConsent', 'controllerAudit']],
+    'compliance' => [Compliance::class, ['createConsent', 'withdrawConsent', 'controllerAudit']],
 ]);

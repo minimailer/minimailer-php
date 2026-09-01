@@ -28,6 +28,19 @@ final class Compliance extends Resource
     }
 
     /**
+     * Record a consent withdrawal (GDPR Art. 7(3)); marks the matching active
+     * consent withdrawn (`withdrawn_at`/`withdrawn_via`) and returns it, 200.
+     * Requires `recipient_email` and `consent_type` plus the domain
+     * relationship; 404 when no matching active consent exists.
+     *
+     * @param  array<string, mixed>  $data
+     */
+    public function withdrawConsent(array $data): Response
+    {
+        return $this->client->create($this->path().'/withdraw', $data);
+    }
+
+    /**
      * Account-level audit export (GDPR Art. 28(3)(h)); asynchronous, 202.
      */
     public function controllerAudit(): Response

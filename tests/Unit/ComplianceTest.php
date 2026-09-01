@@ -49,6 +49,42 @@ it('creates a recipient consent record', function (): void {
         ->and($sent['data']['relationships']['domain']['data']['id'])->toBe('dom_1');
 });
 
+it('withdraws a recipient consent', function (): void {
+    $history = [];
+    $mm = fakeMiniMailerWithHistory([
+        new GuzzleResponse(200, ['Content-Type' => 'application/vnd.api+json'], '{"data":{"id":"consent_1","type":"recipient-consents","attributes":{"recipient_email":"a@example.com","withdrawn_at":"2026-09-01T12:00:00Z","withdrawn_via":"api"}}}'),
+    ], $history);
+
+    $response = $mm->compliance()->withdrawConsent([
+        'data' => [
+            'type' => 'recipient-consents',
+            'attributes' => [
+                'recipient_email' => 'a@example.com',
+                'consent_type' => 'opt_in',
+                'withdrawn_via' => 'api',
+            ],
+            'relationships' => [
+                'domain' => [
+                    'data' => ['type' => 'domains', 'id' => 'dom_1'],
+                ],
+            ],
+        ],
+    ]);
+
+    expect($response->status())->toBe(200)
+        ->and($response->json('data.attributes.withdrawn_via'))->toBe('api');
+
+    $request = $history[0]['request'];
+    $sent = json_decode((string) $request->getBody(), true);
+
+    expect($request->getMethod())->toBe('POST')
+        ->and((string) $request->getUri())->toBe('https://api.minimailer.app/recipient-consents/withdraw')
+        ->and($sent['data']['type'])->toBe('recipient-consents')
+        ->and($sent['data']['attributes']['recipient_email'])->toBe('a@example.com')
+        ->and($sent['data']['attributes']['consent_type'])->toBe('opt_in')
+        ->and($sent['data']['relationships']['domain']['data']['id'])->toBe('dom_1');
+});
+
 it('queues a controller audit export', function (): void {
     $history = [];
     $mm = fakeMiniMailerWithHistory([new GuzzleResponse(202)], $history);
