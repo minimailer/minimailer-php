@@ -10,7 +10,9 @@ use MiniMailer\Resources\Concerns\ListsResources;
 /**
  * Suppression list — the v1 `suppressions` collection. Entries are created by
  * the platform (bounces, complaints, unsubscribes), never via the API; delete
- * removes reversible entries only (permanent ones return 422).
+ * removes reversible entries only (permanent ones return 422). Each entry
+ * carries a `scope` (`marketing` or `all`; filterable via `filter[scope]`) —
+ * only `all`-scope entries block transactional sends.
  */
 final class Suppressions extends Resource
 {

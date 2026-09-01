@@ -58,7 +58,7 @@ Each resource exposes **exactly** the operations the v1 API supports — a verb 
 | `suppressions()` | `list`, `delete` (permanent entries return 422) |
 | `tokens()` | `create`, `delete` (plaintext token returned once on create) |
 | `recipients()` | `forget($email)`, `data($email)` (GDPR erasure / subject access, async 202) |
-| `compliance()` | `createConsent($data)`, `controllerAudit()` |
+| `compliance()` | `createConsent($data)`, `withdrawConsent($data)` (GDPR Art. 7(3)), `controllerAudit()` |
 
 ### Error handling
 
