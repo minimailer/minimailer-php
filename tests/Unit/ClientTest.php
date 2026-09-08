@@ -130,3 +130,65 @@ it('wraps a PSR-18 transport failure in an ApiException', function (): void {
 it('wires a default HTTP client when none is injected, without sending anything', function (): void {
     expect(new Client('k'))->toBeInstanceOf(Client::class);
 });
+
+it('identifies itself with a minimailer-php User-Agent on every verb', function (string $verb): void {
+    $history = [];
+    $mock = new MockHandler([new GuzzleResponse(200, [], '{}')]);
+    $stack = HandlerStack::create($mock);
+    $stack->push(Middleware::history($history));
+
+    $client = new Client('k', 'https://api.minimailer.app/', new GuzzleClient(['handler' => $stack]));
+
+    match ($verb) {
+        'list' => $client->list('domains'),
+        'get' => $client->get('domains', 'dom_1'),
+        'create' => $client->create('domains', ['data' => ['type' => 'domains']]),
+        'update' => $client->update('domains', 'dom_1', ['data' => ['type' => 'domains']]),
+        'delete' => $client->delete('domains', 'dom_1'),
+    };
+
+    expect($history[0]['request']->getHeaderLine('User-Agent'))
+        ->toBe(Client::userAgent())
+        ->toMatch('#^minimailer-php/\S+$#');
+})->with(['list', 'get', 'create', 'update', 'delete']);
+
+it('lets a caller-supplied User-Agent win', function (): void {
+    $history = [];
+    $mock = new MockHandler([new GuzzleResponse(200, [], '{}')]);
+    $stack = HandlerStack::create($mock);
+    $stack->push(Middleware::history($history));
+
+    $client = new Client('k', 'https://api.minimailer.app/', new GuzzleClient(['handler' => $stack]));
+    $client->create('domains', ['data' => ['type' => 'domains']], ['User-Agent' => 'my-app/1.0']);
+
+    expect($history[0]['request']->getHeaderLine('User-Agent'))->toBe('my-app/1.0');
+});
+
+it('builds the default Guzzle client with connect and request timeouts', function (): void {
+    // No request is sent here — only the constructed client's config is inspected.
+    $client = new Client('k');
+
+    $guzzle = (new ReflectionProperty(Client::class, 'httpClient'))->getValue($client);
+    $config = (new ReflectionProperty(GuzzleClient::class, 'config'))->getValue($guzzle);
+
+    expect($guzzle)->toBeInstanceOf(GuzzleClient::class)
+        ->and($config['connect_timeout'])->toBe(Client::DEFAULT_HTTP_OPTIONS['connect_timeout'])
+        ->and($config['timeout'])->toBe(Client::DEFAULT_HTTP_OPTIONS['timeout'])
+        ->and(Client::DEFAULT_HTTP_OPTIONS['timeout'])->toBeGreaterThan(0.0)
+        ->and(Client::DEFAULT_HTTP_OPTIONS['connect_timeout'])->toBeGreaterThan(0.0);
+});
+
+it('overrides default headers case-insensitively', function (string $name): void {
+    $history = [];
+    $mock = new MockHandler([new GuzzleResponse(200, [], '{}')]);
+    $stack = HandlerStack::create($mock);
+    $stack->push(Middleware::history($history));
+
+    $client = new Client('k', 'https://api.minimailer.app/', new GuzzleClient(['handler' => $stack]));
+    $client->create('domains', ['data' => ['type' => 'domains']], [$name => 'my-app/1.0']);
+
+    $request = $history[0]['request'];
+
+    expect($request->getHeader('User-Agent'))->toBe(['my-app/1.0'])
+        ->and($request->getHeaderLine('Authorization'))->toBe('Bearer k');
+})->with(['user-agent', 'USER-AGENT', 'User-Agent']);

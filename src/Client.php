@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MiniMailer;
 
+use Composer\InstalledVersions;
 use GuzzleHttp\Client as GuzzleClient;
 use GuzzleHttp\Psr7\Request;
 use JsonException;
@@ -26,6 +27,20 @@ final readonly class Client implements ClientContract
 {
     private const CONTENT_TYPE = 'application/vnd.api+json';
 
+    private const PACKAGE = 'minimailer/minimailer-php';
+
+    /**
+     * Options for the Guzzle client built when none is injected. Guzzle's own
+     * defaults are `timeout: 0` (wait forever) — a hung upstream would block
+     * the calling process indefinitely. Inject your own PSR-18 client to tune.
+     *
+     * @var array<string, float>
+     */
+    public const DEFAULT_HTTP_OPTIONS = [
+        'connect_timeout' => 10.0,
+        'timeout' => 30.0,
+    ];
+
     private ClientInterface $httpClient;
 
     private string $baseUrl;
@@ -36,7 +51,27 @@ final readonly class Client implements ClientContract
         ?ClientInterface $httpClient = null,
     ) {
         $this->baseUrl = rtrim($baseUrl, '/').'/';
-        $this->httpClient = $httpClient ?? new GuzzleClient;
+        $this->httpClient = $httpClient ?? new GuzzleClient(self::DEFAULT_HTTP_OPTIONS);
+    }
+
+    /**
+     * `minimailer-php/<installed version>` — identifies the SDK on every
+     * request. Falls back to `dev` when the package is not Composer-installed
+     * (e.g. a path checkout).
+     */
+    public static function userAgent(): string
+    {
+        $version = 'dev';
+
+        if (class_exists(InstalledVersions::class)) {
+            try {
+                $version = InstalledVersions::getPrettyVersion(self::PACKAGE) ?? 'dev';
+            } catch (\OutOfBoundsException) {
+                // Not installed as a Composer package; keep the fallback.
+            }
+        }
+
+        return 'minimailer-php/'.$version;
     }
 
     public function list(string $resource, array $query = []): Response
@@ -81,13 +116,20 @@ final readonly class Client implements ClientContract
         $request = new Request(
             $method,
             $this->baseUrl.ltrim($path, '/'),
-            array_merge([
+            [
                 'Authorization' => 'Bearer '.$this->apiKey,
                 'Accept' => self::CONTENT_TYPE,
                 'Content-Type' => self::CONTENT_TYPE,
-            ], $headers),
+                'User-Agent' => self::userAgent(),
+            ],
             $body,
         );
+
+        // withHeader() replaces case-insensitively, so a caller's `user-agent`
+        // overrides the default instead of being appended next to it.
+        foreach ($headers as $name => $value) {
+            $request = $request->withHeader($name, $value);
+        }
 
         try {
             $response = new Response($this->httpClient->sendRequest($request));
