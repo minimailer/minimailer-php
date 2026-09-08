@@ -1,13 +1,18 @@
 # MiniMailer PHP SDK
 
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/minimailer/minimailer-php.svg?style=flat-square)](https://packagist.org/packages/minimailer/minimailer-php)
+[![Total Downloads](https://img.shields.io/packagist/dt/minimailer/minimailer-php.svg?style=flat-square)](https://packagist.org/packages/minimailer/minimailer-php)
+[![License](https://img.shields.io/packagist/l/minimailer/minimailer-php.svg?style=flat-square&color=yellow)](https://github.com/minimailer/minimailer-php/blob/main/LICENSE)
+[![Tests](https://img.shields.io/github/actions/workflow/status/minimailer/minimailer-php/tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/minimailer/minimailer-php/actions/workflows/tests.yml)
+
 A lightweight, framework-agnostic PHP client for the [MiniMailer](https://minimailer.app) API — EU-resident, GDPR-first email infrastructure.
 
-> Private / pre-release. Pinned to the MiniMailer **v1** API contract.
+> Pre-release (`0.x`), pinned to the MiniMailer **v1** API contract. The public surface is not covered by SemVer guarantees until `1.0.0`; every change is listed in the [changelog](CHANGELOG.md).
 
 ## Requirements
 
 - PHP 8.2+
-- A PSR-18 HTTP client (Guzzle is used by default)
+- Guzzle 7.15+ or 8.0.1+ ships as the default HTTP client. Any PSR-18 client can be injected instead (see [HTTP client behaviour](#http-client-behaviour)).
 
 ## Installation
 
@@ -66,6 +71,7 @@ Every non-2xx response throws a typed exception extending `MiniMailer\Exceptions
 
 | Status | Exception |
 | --- | --- |
+| 3xx | `ApiException` (redirects are never followed — see below) |
 | 401 | `AuthenticationException` |
 | 403 | `AuthorizationException` |
 | 409 | `ConflictException` |
@@ -85,10 +91,42 @@ try {
 }
 ```
 
+### HTTP client behaviour
+
+When no client is injected, the SDK builds a Guzzle client that:
+
+- gives up after **10 s** connecting and **30 s** per request (Guzzle's own default would wait forever),
+- **never follows redirects** — a `3xx` response surfaces as an `ApiException` instead of replaying your bearer token against another host,
+- identifies itself with `User-Agent: minimailer-php/<installed version>`.
+
+Every request also carries `Authorization: Bearer …` and the JSON:API media type. Headers you pass to `create()` / `update()` override those defaults, case-insensitively.
+
+To tune any of this, inject your own PSR-18 client:
+
+```php
+use GuzzleHttp\Client as GuzzleClient;
+use MiniMailer\Client;
+use MiniMailer\MiniMailer;
+
+$http = new GuzzleClient(['timeout' => 5.0, 'connect_timeout' => 2.0]);
+
+$mailer = new MiniMailer(new Client('your-api-key', 'https://api.minimailer.app/', $http));
+```
+
+## API reference
+
+The v1 contract is published as an OpenAPI document: <https://api.minimailer.app/openapi.yaml>. Every accessor above maps one-to-one onto an operation in it.
+
 ## Laravel
 
-For a first-class Laravel mail transport (`MAIL_MAILER=minimailer`), use the companion package `minimailer/laravel-minimailer`, which builds on this SDK.
+For a first-class Laravel mail transport (`MAIL_MAILER=minimailer`), use the companion package [`minimailer/laravel-minimailer`](https://github.com/minimailer/laravel-minimailer), which builds on this SDK.
+
+## Contributing and security
+
+- [Contributing guide](.github/CONTRIBUTING.md) — setup, tests, and the no-network rule for the test suite.
+- [Security policy](.github/SECURITY.md) — report vulnerabilities privately, never in a public issue.
+- [Changelog](CHANGELOG.md)
 
 ## License
 
-MIT.
+[MIT](LICENSE).
