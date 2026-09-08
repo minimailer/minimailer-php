@@ -32,11 +32,15 @@ final readonly class Client implements ClientContract
     /**
      * Options for the Guzzle client built when none is injected. Guzzle's own
      * defaults are `timeout: 0` (wait forever) — a hung upstream would block
-     * the calling process indefinitely. Inject your own PSR-18 client to tune.
+     * the calling process indefinitely — and `allow_redirects: true`, which
+     * would follow a redirect to any host, Bearer token included. The API
+     * never redirects, so redirects are refused and surfaced as an error.
+     * Inject your own PSR-18 client to tune.
      *
-     * @var array<string, float>
+     * @var array<string, float|bool>
      */
     public const DEFAULT_HTTP_OPTIONS = [
+        'allow_redirects' => false,
         'connect_timeout' => 10.0,
         'timeout' => 30.0,
     ];
@@ -146,8 +150,15 @@ final readonly class Client implements ClientContract
     {
         $status = $response->status();
 
-        if ($status < 400) {
+        if ($status < 300) {
             return;
+        }
+
+        if ($status < 400) {
+            throw new ApiException(
+                response: $response,
+                message: sprintf('Unexpected redirect (HTTP %d) from the MiniMailer API; redirects are not followed.', $status),
+            );
         }
 
         $detail = $response->json('errors.0.detail');
