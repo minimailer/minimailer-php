@@ -9,8 +9,22 @@ surface is not yet covered by SemVer guarantees until `1.0.0` is tagged.
 
 ### Added
 
+- `NotFoundException` (404) and `PaymentRequiredException` (402), mapped like
+  the other typed exceptions. A 404 means the record does not exist or belongs
+  to another account; the API returns the same status, code and detail for
+  both by design, so the exception never confirms that an identifier is in use.
+- `ApiException::errorCode()` — the JSON:API error code (`errors.0.code`), the
+  value the contract says to branch on (`not_found`, `missing_scope`,
+  `agent_throttled`, …); the message remains the error's `detail`.
 - `Compliance::withdrawConsent()` — `POST /recipient-consents/withdraw` (GDPR
   Art. 7(3)); the consent resource now carries `withdrawn_at`/`withdrawn_via`.
+
+### Changed
+
+- `AuthorizationException` (403) now documents what the API actually returns
+  it for: a missing scope or a JSON:API protocol rule. It is never thrown for
+  another account's record (404) nor for an exhausted sending allowance
+  (402 monthly, 429 daily), which the previous docblock attributed to 403.
 
 ### Fixed
 

@@ -73,11 +73,17 @@ Every non-2xx response throws a typed exception extending `MiniMailer\Exceptions
 | --- | --- |
 | 3xx | `ApiException` (redirects are never followed — see below) |
 | 401 | `AuthenticationException` |
-| 403 | `AuthorizationException` |
+| 402 | `PaymentRequiredException` (free-tier monthly sending allowance exhausted) |
+| 403 | `AuthorizationException` (missing scope, or a JSON:API protocol rule) |
+| 404 | `NotFoundException` (see below) |
 | 409 | `ConflictException` |
 | 415 | `UnsupportedMediaTypeException` |
 | 422 | `ValidationException` (see `->errors()`) |
 | 429 | `RateLimitException` (see `->retryAfter()`) |
+
+Every exception carries the response (`->response`) and the JSON:API error code (`->errorCode()`, e.g. `not_found`, `missing_scope`, `agent_throttled`). Branch on the status and that code; the message is the error's `detail`, whose wording is not part of the contract.
+
+A `404` means the record does not exist **or** belongs to another account. The API answers both cases with the same status, code and detail by design, so a `NotFoundException` never confirms that an identifier is in use, and a `403` is never returned for another account's record.
 
 ```php
 use MiniMailer\Exceptions\ValidationException;
