@@ -13,6 +13,8 @@ use MiniMailer\Exceptions\ApiException;
 use MiniMailer\Exceptions\AuthenticationException;
 use MiniMailer\Exceptions\AuthorizationException;
 use MiniMailer\Exceptions\ConflictException;
+use MiniMailer\Exceptions\NotFoundException;
+use MiniMailer\Exceptions\PaymentRequiredException;
 use MiniMailer\Exceptions\RateLimitException;
 use MiniMailer\Exceptions\UnsupportedMediaTypeException;
 use MiniMailer\Exceptions\ValidationException;
@@ -166,7 +168,9 @@ final readonly class Client implements ClientContract
 
         throw match ($status) {
             401 => new AuthenticationException($response, $message),
+            402 => new PaymentRequiredException($response, $message),
             403 => new AuthorizationException($response, $message),
+            404 => new NotFoundException($response, $message),
             409 => new ConflictException($response, $message),
             415 => new UnsupportedMediaTypeException($response, $message),
             422 => new ValidationException($response, $message),
