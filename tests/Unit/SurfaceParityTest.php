@@ -18,7 +18,7 @@ use MiniMailer\Resources\Webhooks;
 
 /*
  * Locks each resource's public surface to exactly the operations its v1
- * collection supports (mmm/openapi.yaml). A method the API does not offer
+ * collection supports (https://api.minimailer.app/openapi.yaml). A method the API does not offer
  * must not exist; an operation the API offers must. Drift fails loudly here.
  */
 it('exposes exactly the spec operations', function (string $class, array $expected): void {

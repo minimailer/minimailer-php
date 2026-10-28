@@ -1,8 +1,7 @@
 # MiniMailer PHP SDK
 
-[![Latest Version on Packagist](https://img.shields.io/packagist/v/minimailer/minimailer-php.svg?style=flat-square)](https://packagist.org/packages/minimailer/minimailer-php)
-[![Total Downloads](https://img.shields.io/packagist/dt/minimailer/minimailer-php.svg?style=flat-square)](https://packagist.org/packages/minimailer/minimailer-php)
-[![License](https://img.shields.io/packagist/l/minimailer/minimailer-php.svg?style=flat-square&color=yellow)](https://github.com/minimailer/minimailer-php/blob/main/LICENSE)
+[![Latest release](https://img.shields.io/github/v/release/minimailer/minimailer-php?style=flat-square)](https://github.com/minimailer/minimailer-php/releases)
+[![License](https://img.shields.io/github/license/minimailer/minimailer-php?style=flat-square&color=yellow)](https://github.com/minimailer/minimailer-php/blob/main/LICENSE)
 [![Tests](https://img.shields.io/github/actions/workflow/status/minimailer/minimailer-php/tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/minimailer/minimailer-php/actions/workflows/tests.yml)
 
 A lightweight, framework-agnostic PHP client for the [MiniMailer](https://minimailer.app) API — EU-resident, GDPR-first email infrastructure.
@@ -16,8 +15,11 @@ A lightweight, framework-agnostic PHP client for the [MiniMailer](https://minima
 
 ## Installation
 
+The package is not on Packagist yet. Add the repository, then require it:
+
 ```bash
-composer require minimailer/minimailer-php
+composer config repositories.minimailer-php vcs https://github.com/minimailer/minimailer-php
+composer require minimailer/minimailer-php:^0.1
 ```
 
 ## Usage

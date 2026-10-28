@@ -9,6 +9,7 @@
         "transactional",
         "mailer"
     ],
+    "homepage": "https://minimailer.app",
     "license": "MIT",
     "type": "library",
     "authors": [
@@ -17,6 +18,12 @@
             "email": "hello@minimailer.app"
         }
     ],
+    "support": {
+        "issues": "https://github.com/minimailer/minimailer-php/issues",
+        "source": "https://github.com/minimailer/minimailer-php",
+        "security": "https://github.com/minimailer/minimailer-php/security/policy",
+        "docs": "https://api.minimailer.app/openapi.yaml"
+    },
     "require": {
         "php": "^8.2",
         "ext-json": "*",
