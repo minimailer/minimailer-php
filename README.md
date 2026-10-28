@@ -39,7 +39,7 @@ $response = $mailer->emails()->create([
             'html' => '<p>Thanks for signing up.</p>',
         ],
         'relationships' => [
-            'domain' => ['type' => 'domains', 'id' => 'dom_...'],
+            'domain' => ['data' => ['type' => 'domains', 'id' => 'dom_...']],
         ],
     ],
 ]);
